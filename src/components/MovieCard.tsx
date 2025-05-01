@@ -1,6 +1,6 @@
-import { Card, CardContent, CardMedia, Typography, Box, Chip, Stack, Tooltip } from '@mui/material';
+import { Card, Typography, Box, Stack } from '@mui/material';
 import Image from 'next/image';
-import { Star, CalendarMonth, Visibility } from '@mui/icons-material';
+import { Star, CalendarMonth } from '@mui/icons-material';
 
 interface Movie {
   id: number;

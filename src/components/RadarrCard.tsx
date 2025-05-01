@@ -1,33 +1,7 @@
-import { Card, CardContent, Typography, Box, Chip, Stack, Tooltip } from '@mui/material';
+import { Card, CardContent, Typography, Box, Stack } from '@mui/material';
 import Image from 'next/image';
-import { Download, Visibility, VisibilityOff, CalendarToday, Storage } from '@mui/icons-material';
-
-interface RadarrMovie {
-  id: number;
-  title: string;
-  originalTitle: string;
-  year: number;
-  path: string;
-  qualityProfileId: number;
-  monitored: boolean;
-  minimumAvailability: string;
-  isAvailable: boolean;
-  overview: string;
-  images: {
-    coverType: string;
-    url: string;
-  }[];
-  tmdbId: number;
-  imdbId: string;
-  youTubeTrailerId: string;
-  status: string;
-  hasFile: boolean;
-  downloaded: boolean;
-  sizeOnDisk: number;
-  added: string;
-  physicalRelease: string;
-  digitalRelease: string;
-}
+import { CalendarToday, Storage } from '@mui/icons-material';
+import { RadarrMovie } from '@/types/radarr';
 
 interface RadarrCardProps {
   movie: RadarrMovie;
@@ -35,6 +9,15 @@ interface RadarrCardProps {
 }
 
 export default function RadarrCard({ movie, priority = false }: RadarrCardProps) {
+  const formatDate = (dateString: string) => {
+    if (!dateString) return '未知';
+    return new Date(dateString).toLocaleDateString('zh-CN', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
   const formatFileSize = (bytes: number) => {
     const units = ['B', 'KB', 'MB', 'GB', 'TB'];
     let size = bytes;
@@ -44,15 +27,6 @@ export default function RadarrCard({ movie, priority = false }: RadarrCardProps)
       unitIndex++;
     }
     return `${size.toFixed(1)} ${units[unitIndex]}`;
-  };
-
-  const formatDate = (dateString: string) => {
-    if (!dateString) return '未知';
-    return new Date(dateString).toLocaleDateString('zh-CN', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
   };
 
   const getPosterUrl = () => {
@@ -96,12 +70,7 @@ export default function RadarrCard({ movie, priority = false }: RadarrCardProps)
             left: 0,
             right: 0,
             bottom: 0,
-            background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%)',
-            opacity: 0,
-            transition: 'opacity 0.3s',
-            '&:hover': {
-              opacity: 1,
-            }
+            background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%)',
           }}
         />
         <Box
@@ -111,20 +80,22 @@ export default function RadarrCard({ movie, priority = false }: RadarrCardProps)
             left: 0,
             right: 0,
             p: 2,
-            opacity: 0,
-            transition: 'opacity 0.3s',
-            '&:hover': {
-              opacity: 1,
-            }
+            color: 'white',
           }}
         >
+          <Typography variant="h6" component="div" noWrap sx={{ mb: 1 }}>
+            {movie.title}
+          </Typography>
+          {movie.releaseDate && (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <CalendarToday fontSize="small" />
+              <Typography variant="body2">
+                发行日期: {formatDate(movie.releaseDate)}
+              </Typography>
+            </Box>
+          )}
         </Box>
       </Box>
-      <CardContent sx={{ flexGrow: 1 }}>
-        <Typography gutterBottom variant="h6" component="div" noWrap>
-          {movie.title}
-        </Typography>
-      </CardContent>
     </Card>
   );
 } 

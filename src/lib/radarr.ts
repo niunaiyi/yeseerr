@@ -1,29 +1,4 @@
-interface RadarrMovie {
-  id: number;
-  title: string;
-  originalTitle: string;
-  year: number;
-  path: string;
-  qualityProfileId: number;
-  monitored: boolean;
-  minimumAvailability: string;
-  isAvailable: boolean;
-  overview: string;
-  images: {
-    coverType: string;
-    url: string;
-  }[];
-  tmdbId: number;
-  imdbId: string;
-  youTubeTrailerId: string;
-  status: string;
-  hasFile: boolean;
-  downloaded: boolean;
-  sizeOnDisk: number;
-  added: string;
-  physicalRelease: string;
-  digitalRelease: string;
-}
+import { RadarrMovie } from '@/types/radarr';
 
 interface RadarrConfig {
   baseUrl: string;
@@ -72,5 +47,6 @@ export function convertToMovieFormat(radarrMovie: RadarrMovie) {
     status: radarrMovie.status,
     downloaded: radarrMovie.downloaded,
     sizeOnDisk: radarrMovie.sizeOnDisk,
+    images: radarrMovie.images,
   };
 } 
