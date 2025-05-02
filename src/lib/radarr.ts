@@ -1,4 +1,4 @@
-import { RadarrMovie } from '@/types/radarr';
+import { RadarrMovie } from '@/types/radarrmovie';
 
 interface RadarrConfig {
   baseUrl: string;
@@ -42,11 +42,39 @@ export function convertToMovieFormat(radarrMovie: RadarrMovie) {
     title: radarrMovie.title,
     poster_path: radarrMovie.images.find(img => img.coverType === 'poster')?.url || '',
     overview: radarrMovie.overview,
-    release_date: radarrMovie.physicalRelease || radarrMovie.digitalRelease || '',
-    vote_average: 0, // Radarr 不提供评分信息
-    status: radarrMovie.status,
-    downloaded: radarrMovie.downloaded,
-    sizeOnDisk: radarrMovie.sizeOnDisk,
+    release_date: radarrMovie.releaseDate || '',
+    vote_average: 0,
     images: radarrMovie.images,
   };
+}
+
+export async function getMovieByTmdbId(tmdbId: number): Promise<RadarrMovie[] | null> {
+  console.log('2');
+  if (!config.baseUrl || !config.apiKey) {
+    throw new Error('Radarr 配置不完整，请检查环境变量');
+  }
+
+  try {
+    const response = await fetch(`${config.baseUrl}/api/v3/movie?tmdbId=${tmdbId}`, {
+      headers: {
+        'X-Api-Key': config.apiKey,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    return await response.json();
+  } catch (error) {
+    console.error('获取电影详情失败:', error);
+    throw error;
+  }
+}
+
+export async function getRadarrMovieTmdbIds(): Promise<number[]> {
+  try {
+    const movies = await fetchRadarrMovies();
+    return movies.map(movie => movie.tmdbId);
+  } catch (error) {
+    console.error('获取 Radarr 电影 tmdbID 失败:', error);
+    throw error;
+  }
 } 

@@ -1,92 +1,115 @@
-import { Card, Typography, Box, Stack } from '@mui/material';
-import Image from 'next/image';
-import { Star, CalendarMonth } from '@mui/icons-material';
+"use client";
 
-interface Movie {
-  id: number;
-  title: string;
-  poster_path: string;
-  overview: string;
-  release_date: string;
-  vote_average: number;
-}
+import { useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { Box, Typography, Chip, Tooltip } from "@mui/material";
+import { Movie } from "@/types/move";
+import { LocalMovies } from "@mui/icons-material";
 
 interface MovieCardProps {
   movie: Movie;
   priority?: boolean;
+  inRadarr?: boolean;
 }
 
-export default function MovieCard({ movie, priority = false }: MovieCardProps) {
-  const getPosterUrl = () => {
-    if (!movie.poster_path) return '/placeholder.jpg';
-    return `https://image.tmdb.org/t/p/w500${movie.poster_path}`;
-  };
+export default function MovieCard({ movie, priority = false, inRadarr = false }: MovieCardProps) {
+  const [isHovered, setIsHovered] = useState(false);
 
   return (
-    <Card 
-      sx={{ 
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        transition: 'transform 0.2s, box-shadow 0.2s',
-        '&:hover': {
-          transform: 'scale(1.02)',
-          boxShadow: 6,
-        }
-      }}
-    >
-      <Box sx={{ position: 'relative', height: 400 }}>
+    <Link href={`/movie/${movie.id}`} passHref>
+      <Box
+        sx={{
+          position: "relative",
+          width: "100%",
+          aspectRatio: "2/3",
+          borderRadius: 2,
+          overflow: "hidden",
+          cursor: "pointer",
+          "&:hover .movie-info": {
+            opacity: 1,
+          },
+        }}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
         <Image
-          src={getPosterUrl()}
+          src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
           alt={movie.title}
           fill
+          sizes="(max-width: 600px) 100vw, (max-width: 900px) 50vw, 33vw"
           priority={priority}
-          sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-          style={{ objectFit: 'cover' }}
-        />
-        <Box
-          sx={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%)',
+          style={{
+            objectFit: "cover",
+            transition: "transform 0.3s ease",
+            transform: isHovered ? "scale(1.05)" : "scale(1)",
           }}
         />
+
+        {inRadarr && (
+          <Tooltip title="已在电影库中" placement="top">
+            <Box
+              sx={{
+                position: "absolute",
+                top: 8,
+                right: 8,
+                backgroundColor: "rgba(0, 0, 0, 0.7)",
+                borderRadius: "50%",
+                padding: "4px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <LocalMovies sx={{ color: "primary.main", fontSize: "1.2rem" }} />
+            </Box>
+          </Tooltip>
+        )}
+
         <Box
+          className="movie-info"
           sx={{
-            position: 'absolute',
+            position: "absolute",
             bottom: 0,
             left: 0,
             right: 0,
-            p: 2,
-            color: 'white',
+            padding: 2,
+            background: "linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%)",
+            color: "white",
+            opacity: 1,
+            transition: "opacity 0.3s ease",
           }}
         >
-          <Typography variant="h6" component="div" noWrap sx={{ mb: 1 }}>
+          <Typography
+            variant="h6"
+            sx={{
+              fontWeight: "bold",
+              mb: 0.5,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              display: "-webkit-box",
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: "vertical",
+            }}
+          >
             {movie.title}
           </Typography>
-          <Stack spacing={1}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <CalendarMonth fontSize="small" />
-              <Typography variant="body2">
-                {new Date(movie.release_date).toLocaleDateString('zh-CN', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric'
-                })}
-              </Typography>
-            </Box>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Star fontSize="small" />
-              <Typography variant="body2">
-                {movie.vote_average.toFixed(1)} 分
-              </Typography>
-            </Box>
-          </Stack>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <Chip
+              label={`${movie.vote_average.toFixed(1)}`}
+              size="small"
+              sx={{
+                backgroundColor: "rgba(255, 255, 255, 0.2)",
+                color: "white",
+                fontWeight: "bold",
+              }}
+            />
+            <Typography variant="body2" sx={{ opacity: 0.8 }}>
+              {movie.release_date.split("-")[0]}
+            </Typography>
+          </Box>
         </Box>
       </Box>
-    </Card>
+    </Link>
   );
 } 

@@ -3,29 +3,28 @@
 import { useEffect, useState } from 'react';
 import { fetchRadarrMovies } from '@/lib/radarr';
 import RadarrCard from '@/components/RadarrCard';
-import { RadarrMovie } from '@/types/radarr';
 import { Box, Container, Typography, IconButton } from '@mui/material';
 import { ArrowBack } from '@mui/icons-material';
 import Link from 'next/link';
-
+import { RadarrMovie } from '@/types/radarrmovie';
 export default function RadarrPage() {
   const [movies, setMovies] = useState<RadarrMovie[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const loadMovies = async () => {
-      try {
-        const data = await fetchRadarrMovies();
-        setMovies(data);
-      } catch (err) {
-        setError('获取电影数据失败，请稍后重试');
-        console.error('Error loading movies:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const loadMovies = async () => {
+    try {
+      const data = await fetchRadarrMovies();
+      setMovies(data);
+    } catch (err) {
+      setError('获取电影数据失败，请稍后重试');
+      console.error('Error loading movies:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     loadMovies();
   }, []);
 

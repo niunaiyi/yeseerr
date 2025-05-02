@@ -1,7 +1,7 @@
-import { Card, CardContent, Typography, Box, Stack } from '@mui/material';
+import { Card, Typography, Box } from '@mui/material';
 import Image from 'next/image';
-import { CalendarToday, Storage } from '@mui/icons-material';
-import { RadarrMovie } from '@/types/radarr';
+import { CalendarToday} from '@mui/icons-material';
+import { RadarrMovie } from '@/types/radarrmovie';
 
 interface RadarrCardProps {
   movie: RadarrMovie;
@@ -18,16 +18,6 @@ export default function RadarrCard({ movie, priority = false }: RadarrCardProps)
     });
   };
 
-  const formatFileSize = (bytes: number) => {
-    const units = ['B', 'KB', 'MB', 'GB', 'TB'];
-    let size = bytes;
-    let unitIndex = 0;
-    while (size >= 1024 && unitIndex < units.length - 1) {
-      size /= 1024;
-      unitIndex++;
-    }
-    return `${size.toFixed(1)} ${units[unitIndex]}`;
-  };
 
   const getPosterUrl = () => {
     const poster = movie.images.find(img => img.coverType === 'poster');

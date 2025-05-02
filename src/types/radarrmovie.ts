@@ -2,6 +2,7 @@ export interface RadarrMovie {
   id: number;
   title: string;
   path: string;
+  monitored: boolean;
   overview: string;
   images: {
     coverType: string;
@@ -9,11 +10,6 @@ export interface RadarrMovie {
   }[];
   tmdbId: number;
   imdbId: string;  
-  releaseDate: string;
-  status: string;
-  downloaded: boolean;
-  sizeOnDisk: number;
-  hasFile: boolean;
-  physicalRelease?: string;
-  digitalRelease?: string;
+  releaseDate: string;  
 } 
+
