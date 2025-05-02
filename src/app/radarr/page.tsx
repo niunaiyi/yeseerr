@@ -6,7 +6,7 @@ import RadarrCard from '@/components/RadarrCard';
 import { Box, Container, Typography, IconButton } from '@mui/material';
 import { ArrowBack } from '@mui/icons-material';
 import Link from 'next/link';
-import { RadarrMovie } from '@/types/radarrmovie';
+import { RadarrMovie } from '@/types/RadarrMovie';
 export default function RadarrPage() {
   const [movies, setMovies] = useState<RadarrMovie[]>([]);
   const [loading, setLoading] = useState(true);

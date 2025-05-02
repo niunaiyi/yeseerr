@@ -1,7 +1,7 @@
 import { Card, Typography, Box } from '@mui/material';
 import Image from 'next/image';
 import { CalendarToday} from '@mui/icons-material';
-import { RadarrMovie } from '@/types/radarrmovie';
+import { RadarrMovie } from '@/types/RadarrMovie';
 
 interface RadarrCardProps {
   movie: RadarrMovie;

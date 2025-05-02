@@ -2,22 +2,66 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
-import { Box, Typography, Chip, Tooltip } from "@mui/material";
-import { Movie } from "@/types/move";
-import { LocalMovies } from "@mui/icons-material";
+import { Box, Typography, Chip, Tooltip, Button, Snackbar, Alert } from "@mui/material";
+import { Movie } from "@/types/Move";
+import { LocalMovies, Add } from "@mui/icons-material";
+import { addMovieToRadarr, getDefaultAddMovieParams } from "@/lib/radarr";
 
 interface MovieCardProps {
   movie: Movie;
   priority?: boolean;
   inRadarr?: boolean;
+  onAddSuccess?: () => void;
 }
 
-export default function MovieCard({ movie, priority = false, inRadarr = false }: MovieCardProps) {
+export default function MovieCard({
+  movie,
+  priority = false,
+  inRadarr = false,
+  onAddSuccess,
+}: MovieCardProps) {
   const [isHovered, setIsHovered] = useState(false);
+  const [isAdding, setIsAdding] = useState(false);
+  const [snackbar, setSnackbar] = useState<{
+    open: boolean;
+    message: string;
+    severity: 'success' | 'error';
+  }>({
+    open: false,
+    message: '',
+    severity: 'success',
+  });
+
+  const handleAddToRadarr = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsAdding(true);
+    try {
+      const movieParams = getDefaultAddMovieParams(movie.id, movie.title);
+      await addMovieToRadarr(movieParams);
+      setSnackbar({
+        open: true,
+        message: '电影添加成功',
+        severity: 'success',
+      });
+      onAddSuccess?.();
+    } catch (error) {
+      console.error("添加电影失败:", error);
+      setSnackbar({
+        open: true,
+        message: error instanceof Error ? error.message : '添加电影失败',
+        severity: 'error',
+      });
+    } finally {
+      setIsAdding(false);
+    }
+  };
+
+  const handleCloseSnackbar = () => {
+    setSnackbar(prev => ({ ...prev, open: false }));
+  };
 
   return (
-    <Link href={`/movie/${movie.id}`} passHref>
+    <>
       <Box
         sx={{
           position: "relative",
@@ -46,23 +90,56 @@ export default function MovieCard({ movie, priority = false, inRadarr = false }:
           }}
         />
 
-        {inRadarr && (
+        {inRadarr ? (
           <Tooltip title="已在电影库中" placement="top">
-            <Box
+            <Button
+              disabled={true}
               sx={{
                 position: "absolute",
                 top: 8,
                 right: 8,
                 backgroundColor: "rgba(0, 0, 0, 0.7)",
                 borderRadius: "50%",
-                padding: "4px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
+                minWidth: "36px",
+                width: "36px",
+                height: "36px",
+                padding: 0,
+                "&:hover": {
+                  backgroundColor: "rgba(0, 0, 0, 0.9)",
+                },
+                "&.Mui-disabled": {
+                  backgroundColor: "rgba(0, 0, 0, 0.5)",
+                },
               }}
             >
               <LocalMovies sx={{ color: "primary.main", fontSize: "1.2rem" }} />
-            </Box>
+            </Button>
+          </Tooltip>
+        ) : (
+          <Tooltip title="添加到电影库" placement="top">
+            <Button
+              onClick={handleAddToRadarr}
+              disabled={isAdding}
+              sx={{
+                position: "absolute",
+                top: 8,
+                right: 8,
+                backgroundColor: "rgba(0, 0, 0, 0.7)",
+                borderRadius: "50%",
+                minWidth: "36px",
+                width: "36px",
+                height: "36px",
+                padding: 0,
+                "&:hover": {
+                  backgroundColor: "rgba(0, 0, 0, 0.9)",
+                },
+                "&.Mui-disabled": {
+                  backgroundColor: "rgba(0, 0, 0, 0.5)",
+                },
+              }}
+            >
+              <Add sx={{ color: "primary.main", fontSize: "1.2rem" }} />
+            </Button>
           </Tooltip>
         )}
 
@@ -74,7 +151,8 @@ export default function MovieCard({ movie, priority = false, inRadarr = false }:
             left: 0,
             right: 0,
             padding: 2,
-            background: "linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%)",
+            background:
+              "linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%)",
             color: "white",
             opacity: 1,
             transition: "opacity 0.3s ease",
@@ -110,6 +188,21 @@ export default function MovieCard({ movie, priority = false, inRadarr = false }:
           </Box>
         </Box>
       </Box>
-    </Link>
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert 
+          onClose={handleCloseSnackbar} 
+          severity={snackbar.severity}
+          sx={{ width: '100%' }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
+    </>
   );
-} 
+}
