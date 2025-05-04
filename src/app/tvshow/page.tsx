@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, useCallback, useRef } from "react";
-import { fetchMovies, searchMovies } from "@/lib/movie";
 import MediaCard from "@/components/MediaCard";
 import {
   Box,
@@ -16,57 +15,54 @@ import {
 } from "@mui/material";
 import { ArrowBack, Search } from "@mui/icons-material";
 import Link from "next/link";
-import { getRadarrTmdbIds } from "@/lib/radarr";
-import type { Media} from "@/types/Media";
+import { getSonarrTmdbIds } from "@/lib/sonarr";
+import type { Media } from "@/types/Media";
+import { fetchTVShows, searchTVShows} from "@/lib/tvshow";
 
-export default function MoviesPage() {
-  const [movies, setMovies] = useState<Media[]>([]);
+export default function TVPage() {
+  const [tvShows, setTVShows] = useState<Media[]>([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [radarrIds, setRadarrIds] = useState<number[]>([]);
-  const [activeTab, setActiveTab] = useState<'popular' | 'top_rated' | 'on_the_air'>('popular');
+  const [sonarrTmdbIds, setSonarrTmdbIds] = useState<number[]>([]);
+  const [activeTab, setActiveTab] = useState<string>('popular');
   const [searchQuery, setSearchQuery] = useState('');
   const initialLoadRef = useRef(false);
 
-  const loadMoreMovies = useCallback(async () => {
+  const loadMoreTVShows = useCallback(async () => {
     if (loading || !hasMore) return;
 
     try {
       setLoading(true);
       setError(null);
       const data = searchQuery 
-        ? await searchMovies(searchQuery, page)
-        : await fetchMovies(page, activeTab);
+        ? await searchTVShows(searchQuery, page)
+        : await fetchTVShows(page, activeTab);
 
       if (data.results.length === 0) {
         setHasMore(false);
         return;
       }
 
-      const ids =
-        radarrIds.length > 0
-          ? radarrIds
-          : await getRadarrTmdbIds();
-
-      const moviesWithRadarrStatus = data.results.map((movie) => ({
-        ...movie,
-        inRadarr: ids.includes(movie.id),
+      const ids = sonarrTmdbIds.length > 0 ? sonarrTmdbIds : await getSonarrTmdbIds();
+      const tvShowsWithSonarrStatus = data.results.map((media) => ({
+        ...media,
+        inRadarr: ids.includes(media.id),
       }));
 
-      setMovies((prev) => [...prev, ...moviesWithRadarrStatus]);
+      setTVShows((prev) => [...prev, ...tvShowsWithSonarrStatus]);
       setPage((prev) => prev + 1);
     } catch (err) {
       setError(err instanceof Error ? err.message : "发生未知错误");
     } finally {
       setLoading(false);
     }
-  }, [loading, hasMore, page, radarrIds, activeTab, searchQuery]);
+  }, [loading, hasMore, page, sonarrTmdbIds, activeTab, searchQuery]);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: 'popular' | 'top_rated' | 'on_the_air') => {
     setActiveTab(newValue);
-    setMovies([]);
+    setTVShows([]);
     setPage(1);
     setHasMore(true);
     initialLoadRef.current = false;
@@ -74,16 +70,16 @@ export default function MoviesPage() {
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(event.target.value);
-    setMovies([]);
+    setTVShows([]);
     setPage(1);
     setHasMore(true);
     initialLoadRef.current = false;
   };
 
-  const handleAddSuccess = useCallback((movieId: number) => {
-    setMovies(prevMovies => 
-      prevMovies.map(movie => 
-        movie.id === movieId ? { ...movie, inRadarr: true } : movie
+  const handleAddSuccess = useCallback((TmdbId: number) => {
+    setTVShows(prevShows => 
+      prevShows.map(show => 
+        show.id === TmdbId ? { ...show, inRadarr: true } : show
       )
     );
   }, []);
@@ -93,16 +89,17 @@ export default function MoviesPage() {
       if (!initialLoadRef.current) {
         initialLoadRef.current = true;
         try {
-          const ids = await getRadarrTmdbIds();
-          setRadarrIds(ids);
-          await loadMoreMovies();
+          const ids = await getSonarrTmdbIds();
+          setSonarrTmdbIds(ids);
+          await loadMoreTVShows();
         } catch (err) {
           console.error("初始化加载失败:", err);
         }
       }
     };
+    
     initLoad();
-  }, [loadMoreMovies]);
+  }, [loadMoreTVShows]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -110,13 +107,13 @@ export default function MoviesPage() {
         window.innerHeight + document.documentElement.scrollTop >=
         document.documentElement.scrollHeight - 100
       ) {
-        loadMoreMovies();
+        loadMoreTVShows();
       }
     };
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [loadMoreMovies]);
+  }, [loadMoreTVShows]);
 
   if (error) {
     return (
@@ -145,7 +142,7 @@ export default function MoviesPage() {
             <ArrowBack />
           </IconButton>
           <Typography variant="h4" component="h1" sx={{ fontWeight: "bold" }}>
-            电影
+            电视剧
           </Typography>
         </Box>
 
@@ -159,7 +156,7 @@ export default function MoviesPage() {
             <Tabs
               value={activeTab}
               onChange={handleTabChange}
-              aria-label="电影分类标签"
+              aria-label="电视剧分类标签"
               sx={{
                 '& .MuiTab-root': {
                   fontSize: '1rem',
@@ -167,15 +164,23 @@ export default function MoviesPage() {
                 },
               }}
             >
-              <Tab label="热门电影" value="popular" />
-              <Tab label="正在上映" value="now_playing" />
-              <Tab label="高分电影" value="top_rated" />
+              <Tab label="热门剧集" value="popular" />
+              <Tab label="正在播出" value="on_the_air" />
+              <Tab label="高分剧集" value="top_rated" />
+              <Tab label="Netflix" value="213" />
+              <Tab label="AppleTV+" value="2552" />
+              <Tab label="HBO" value="49" />
+              <Tab label="Hulu" value="453" />
+              <Tab label="Disney+" value="2739" />
+              <Tab label="PrimeVideo" value="1024" />
+              <Tab label="Discovery+" value="4353" />
+              <Tab label="CINEMAX" value="359" />
             </Tabs>
 
             <TextField
               size="small"
               variant="outlined"
-              placeholder="搜索电影..."
+              placeholder="搜索电视剧..."
               value={searchQuery}
               onChange={handleSearchChange}
               slotProps={{
@@ -210,13 +215,13 @@ export default function MoviesPage() {
             gap: 3,
           }}
         >
-          {movies.map((movie, index) => (
+          {tvShows.map((show, index) => (
             <MediaCard
-              key={`${movie.id}-${index}`}
-              movie={movie as Media}
+              key={`${show.id}-${index}`}
+              movie={show}
               priority={index < 4}
-              inRadarr={movie.inRadarr}
-              onAddSuccess={() => handleAddSuccess(movie.id)}
+              inRadarr={show.inRadarr}
+              onAddSuccess={() => handleAddSuccess(show.id)}
             />
           ))}
         </Box>
@@ -229,10 +234,10 @@ export default function MoviesPage() {
 
         {!hasMore && (
           <Box sx={{ textAlign: "center", my: 4 }}>
-            <Typography color="text.secondary">没有更多电影了</Typography>
+            <Typography color="text.secondary">没有更多电视剧了</Typography>
           </Box>
         )}
       </Box>
     </Container>
   );
-}
+} 

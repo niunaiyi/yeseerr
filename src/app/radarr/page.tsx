@@ -2,13 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import { fetchRadarrMovies } from '@/lib/radarr';
-import RadarrCard from '@/components/RadarrCard';
 import { Box, Container, Typography, IconButton } from '@mui/material';
 import { ArrowBack } from '@mui/icons-material';
 import Link from 'next/link';
-import { RadarrMovie } from '@/types/RadarrMovie';
+import { Media } from '@/types/Media';
+import MediaCard from '@/components/MediaCard';
+
 export default function RadarrPage() {
-  const [movies, setMovies] = useState<RadarrMovie[]>([]);
+  const [movies, setMovies] = useState<Media[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -81,7 +82,7 @@ export default function RadarrPage() {
         
         <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr', lg: '1fr 1fr 1fr 1fr' }, gap: 3 }}>
           {movies.map((movie, index) => (
-            <RadarrCard 
+            <MediaCard 
               key={movie.id} 
               movie={movie} 
               priority={index < 4}

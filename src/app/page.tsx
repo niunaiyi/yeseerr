@@ -2,7 +2,7 @@
 
 import { Box, Container, Typography, Button, Stack, Paper } from '@mui/material';
 import Link from "next/link";
-import { Movie, LocalMovies } from '@mui/icons-material';
+import { Movie, LocalMovies, LiveTv } from '@mui/icons-material';
 
 export default function Home() {
   return (
@@ -44,7 +44,7 @@ export default function Home() {
               mb: 2,
             }}
           >
-            欢迎来到电影世界
+            欢迎来到影视世界
           </Typography>
           
           <Stack
@@ -75,6 +75,27 @@ export default function Home() {
             
             <Button
               component={Link}
+              href="/tvshow"
+              variant="contained"
+              size="large"
+              startIcon={<LiveTv />}
+              sx={{
+                px: 4,
+                py: 1.5,
+                borderRadius: 2,
+                textTransform: 'none',
+                fontSize: '1.1rem',
+                background: 'linear-gradient(45deg, #9C27B0 30%, #BA68C8 90%)',
+                '&:hover': {
+                  background: 'linear-gradient(45deg, #7B1FA2 30%, #9C27B0 90%)',
+                },
+              }}
+            >
+              浏览电视剧
+            </Button>
+            
+            <Button
+              component={Link}
               href="/radarr"
               variant="contained"
               size="large"
@@ -91,7 +112,7 @@ export default function Home() {
                 },
               }}
             >
-              我的电影库
+              我的影视库
             </Button>
           </Stack>
         </Paper>

@@ -9,9 +9,17 @@ const nextConfig: NextConfig = {
         hostname: 'image.tmdb.org',
       },
       {
+        protocol: 'https',
+        hostname: 'media.themoviedb.org',
+      },
+      {
         protocol: 'http',
         hostname: '192.168.2.102',
         port: '7878',
+      },
+      {
+        protocol: 'https',  
+        hostname: 'www.themoviedb.org',
       },
     ],
   },

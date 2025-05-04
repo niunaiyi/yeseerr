@@ -3,21 +3,20 @@
 import { useState } from "react";
 import Image from "next/image";
 import { Box, Typography, Chip, Tooltip, Button, Snackbar, Alert } from "@mui/material";
-import { Movie } from "@/types/Move";
+import { Media } from "@/types/Media";
 import { LocalMovies, Add } from "@mui/icons-material";
-import { addMovieToRadarr, getDefaultAddMovieParams } from "@/lib/radarr";
+import { addMovieToRadarr, getDefaultAddMovieParams} from "@/lib/radarr";
 
 interface MovieCardProps {
-  movie: Movie;
+  movie: Media;
   priority?: boolean;
   inRadarr?: boolean;
   onAddSuccess?: () => void;
 }
 
-export default function MovieCard({
+export default function MediaCard({
   movie,
   priority = false,
-  inRadarr = false,
   onAddSuccess,
 }: MovieCardProps) {
   const [isHovered, setIsHovered] = useState(false);
@@ -36,11 +35,13 @@ export default function MovieCard({
     e.preventDefault();
     setIsAdding(true);
     try {
-      const movieParams = getDefaultAddMovieParams(movie.id, movie.title);
-      await addMovieToRadarr(movieParams);
+      console.log('movie', movie);
+
+        const movieParams = getDefaultAddMovieParams(movie.id, movie.title);        
+        await addMovieToRadarr(movieParams);
       setSnackbar({
         open: true,
-        message: '电影添加成功',
+        message: '本地库添加成功',
         severity: 'success',
       });
       onAddSuccess?.();
@@ -78,7 +79,7 @@ export default function MovieCard({
         onMouseLeave={() => setIsHovered(false)}
       >
         <Image
-          src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+          src={`${movie.poster_path}`}
           alt={movie.title}
           fill
           sizes="(max-width: 600px) 100vw, (max-width: 900px) 50vw, 33vw"
@@ -90,10 +91,9 @@ export default function MovieCard({
           }}
         />
 
-        {inRadarr ? (
-          <Tooltip title="已在电影库中" placement="top">
+        {movie.inRadarr ? (
+          <Tooltip title="已在本地库中" placement="top">
             <Button
-              disabled={true}
               sx={{
                 position: "absolute",
                 top: 8,
@@ -116,7 +116,7 @@ export default function MovieCard({
             </Button>
           </Tooltip>
         ) : (
-          <Tooltip title="添加到电影库" placement="top">
+          <Tooltip title="添加到本地库" placement="top">
             <Button
               onClick={handleAddToRadarr}
               disabled={isAdding}
