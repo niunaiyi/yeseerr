@@ -51,7 +51,8 @@ interface AddSeriesRequest {
   title: string;
   qualityProfileId: number;
   rootFolderPath: string;
-  TmdbId: number;
+  tmdbId: number;
+  tvdbId: number;
   monitored: boolean;
   addOptions: {
     searchForMissingEpisodes: boolean;
@@ -73,7 +74,7 @@ function convertToMediaFormat(media: any): Media {
     release_date: media.firstAired || '',
     vote_average: media.ratings?.value || 0,
     tmdbId: media.tmdbId,
-    imdbId: media.imdbId || '',
+    tvdbId: media.tvdbId || 0,
     inRadarr: false,
     mediatype: MediaType.MediaTVShow,
   };
@@ -97,7 +98,13 @@ export async function fetchSonarrSeries(): Promise<Media[]> {
     }
 
     const data = await response.json();
-    return data.map(convertToMediaFormat);
+    const tvshowWithTvdbId = data.map((series: any) => {
+      return {
+        ...series,
+        tvdbId: series.tvdbId || '',
+      };
+    });
+    return tvshowWithTvdbId.map(convertToMediaFormat);
   } catch (error) {
     console.error('获取剧集列表失败:', error);
     throw error;
@@ -143,7 +150,7 @@ export async function getSonarrTmdbIds(): Promise<number[]> {
   }
 }
 
-export async function addSeriesToSonarr(series: AddSeriesRequest): Promise<AddSeriesResponse> {
+export async function addTVShowToSonarr(series: AddSeriesRequest): Promise<AddSeriesResponse> {
   if (!config.baseUrl || !config.apiKey) {
     throw new Error('Sonarr 配置不完整，请检查环境变量');
   }
@@ -174,12 +181,13 @@ export async function addSeriesToSonarr(series: AddSeriesRequest): Promise<AddSe
   }
 }
 
-export function getDefaultAddSeriesParams(TmdbId: number, title: string): AddSeriesRequest {
+export function getDefaultAddTVShowParams(tmdbId: number, title: string, tvdbId: number): AddSeriesRequest {
   return {
     title,
     qualityProfileId: 1, // 默认质量配置ID
-    rootFolderPath: '/tv', // 默认根文件夹路径
-    TmdbId,
+    rootFolderPath: '/media', // 默认根文件夹路径
+    tmdbId,
+    tvdbId,
     monitored: true,
     addOptions: {
       searchForMissingEpisodes: true,

@@ -22,7 +22,7 @@ function convertToMediaFormat(media: any): Media {
     release_date: media.release_date || media.first_air_date,
     vote_average: media.vote_average,
     tmdbId: media.id,
-    imdbId: '',
+    tvdbId: media.tvdb_id || '',
     inRadarr: false,
     mediatype: MediaType.MediaTVShow,
   };

@@ -2,11 +2,19 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { Box, Typography, Chip, Tooltip, Button, Snackbar, Alert } from "@mui/material";
-import { Media } from "@/types/Media";
+import {
+  Box,
+  Typography,
+  Chip,
+  Tooltip,
+  Button,
+  Snackbar,
+  Alert,
+} from "@mui/material";
+import { Media, MediaType } from "@/types/Media";
 import { LocalMovies, Add } from "@mui/icons-material";
-import { addMovieToRadarr, getDefaultAddMovieParams} from "@/lib/radarr";
-
+import { addMovieToRadarr, getDefaultAddMovieParams } from "@/lib/radarr";
+import { addTVShowToSonarr, getDefaultAddTVShowParams, getSeriesByTmdbId } from "@/lib/sonarr";
 interface MovieCardProps {
   movie: Media;
   priority?: boolean;
@@ -24,33 +32,42 @@ export default function MediaCard({
   const [snackbar, setSnackbar] = useState<{
     open: boolean;
     message: string;
-    severity: 'success' | 'error';
+    severity: "success" | "error";
   }>({
     open: false,
-    message: '',
-    severity: 'success',
+    message: "",
+    severity: "success",
   });
 
   const handleAddToRadarr = async (e: React.MouseEvent) => {
     e.preventDefault();
     setIsAdding(true);
     try {
-      console.log('movie', movie);
-
-        const movieParams = getDefaultAddMovieParams(movie.id, movie.title);        
+      console.log("movie", movie);
+      if(movie.mediatype === MediaType.MediaMovie){
+        const movieParams = getDefaultAddMovieParams(movie.id, movie.title);
         await addMovieToRadarr(movieParams);
+      }
+      else if(movie.mediatype === MediaType.MediaTVShow){
+        const tvshow = await getSeriesByTmdbId(movie.tmdbId);
+        if(!tvshow || tvshow.length <= 0){
+          throw new Error("未找到对应的电视剧");
+        }
+        const tvshowParams = getDefaultAddTVShowParams(movie.id, movie.title, tvshow[0].tvdbId);        
+        await addTVShowToSonarr(tvshowParams);
+      }
+
       setSnackbar({
         open: true,
-        message: '本地库添加成功',
-        severity: 'success',
+        message: "本地库添加成功",
+        severity: "success",
       });
       onAddSuccess?.();
     } catch (error) {
-      console.error("添加电影失败:", error);
       setSnackbar({
         open: true,
-        message: error instanceof Error ? error.message : '添加电影失败',
-        severity: 'error',
+        message: error instanceof Error ? error.message : "本地库添加失败",
+        severity: "error",
       });
     } finally {
       setIsAdding(false);
@@ -58,7 +75,7 @@ export default function MediaCard({
   };
 
   const handleCloseSnackbar = () => {
-    setSnackbar(prev => ({ ...prev, open: false }));
+    setSnackbar((prev) => ({ ...prev, open: false }));
   };
 
   return (
@@ -193,12 +210,12 @@ export default function MediaCard({
         open={snackbar.open}
         autoHideDuration={6000}
         onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       >
-        <Alert 
-          onClose={handleCloseSnackbar} 
+        <Alert
+          onClose={handleCloseSnackbar}
           severity={snackbar.severity}
-          sx={{ width: '100%' }}
+          sx={{ width: "100%" }}
         >
           {snackbar.message}
         </Alert>

@@ -14,7 +14,7 @@ export interface Media {
     release_date: string;
     vote_average: number;    
     tmdbId: number;
-    imdbId: string;  
+    tvdbId: number;  
     inRadarr?: boolean;
     mediatype: MediaType;
   }

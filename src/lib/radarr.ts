@@ -86,8 +86,8 @@ function convertToMovieFormat(media: any): Media {
       const ratingsValue = ratings.hasOwnProperty('tmdb') ? ratings.tmdb.value : 0;
       return ratingsValue || 0;
     })(),
-    tmdbId: media.tmdbId,
-    imdbId: media.imdbId || '',
+    tmdbId: media.tmdbId || 0,
+    tvdbId: media.tvdbId || 0,
     inRadarr: true,
     mediatype: MediaType.MediaMovie,
   };
