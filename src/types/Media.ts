@@ -11,7 +11,7 @@ export interface Media {
     title: string;
     poster_path: string;
     overview: string;
-    release_date: string;
+    release_date?: string;
     vote_average: number;    
     tmdbId: number;
     tvdbId: number;  

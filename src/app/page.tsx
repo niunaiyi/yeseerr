@@ -70,7 +70,7 @@ export default function Home() {
                 },
               }}
             >
-              浏览影片
+              电影
             </Button>
             
             <Button
@@ -91,7 +91,7 @@ export default function Home() {
                 },
               }}
             >
-              浏览电视剧
+              电视剧
             </Button>
             
             <Button
@@ -112,7 +112,7 @@ export default function Home() {
                 },
               }}
             >
-              我的影视库
+              影视库
             </Button>
           </Stack>
         </Paper>

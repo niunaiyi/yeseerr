@@ -26,7 +26,7 @@ export default function MoviesPage() {
   const [hasMore, setHasMore] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [radarrIds, setRadarrIds] = useState<number[]>([]);
-  const [activeTab, setActiveTab] = useState<'popular' | 'top_rated' | 'on_the_air'>('popular');
+  const [activeTab, setActiveTab] = useState<string>('popular');
   const [searchQuery, setSearchQuery] = useState('');
   const initialLoadRef = useRef(false);
 
@@ -38,7 +38,7 @@ export default function MoviesPage() {
       setError(null);
       const data = searchQuery 
         ? await searchMovies(searchQuery, page)
-        : await fetchMovies(page, activeTab);
+        : await fetchMovies(page, activeTab === 'search' ? 'popular' : activeTab);
 
       if (data.results.length === 0) {
         setHasMore(false);
@@ -64,8 +64,11 @@ export default function MoviesPage() {
     }
   }, [loading, hasMore, page, radarrIds, activeTab, searchQuery]);
 
-  const handleTabChange = (event: React.SyntheticEvent, newValue: 'popular' | 'top_rated' | 'on_the_air') => {
+  const handleTabChange = (event: React.SyntheticEvent, newValue: 'popular' | 'top_rated' | 'now_playing' | 'search') => {
     setActiveTab(newValue);
+    if (newValue !== 'search') {
+      setSearchQuery('');
+    }
     setMovies([]);
     setPage(1);
     setHasMore(true);
@@ -150,52 +153,67 @@ export default function MoviesPage() {
         </Box>
 
         <Box sx={{ mb: 4 }}>
-          <Box sx={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: 2,
-            flexWrap: 'wrap'
-          }}>
-            <Tabs
-              value={activeTab}
-              onChange={handleTabChange}
-              aria-label="电影分类标签"
-              sx={{
-                '& .MuiTab-root': {
-                  fontSize: '1rem',
-                  fontWeight: 'bold',
-                },
-              }}
-            >
-              <Tab label="热门电影" value="popular" />
-              <Tab label="正在上映" value="now_playing" />
-              <Tab label="高分电影" value="top_rated" />
-            </Tabs>
-
-            <TextField
-              size="small"
-              variant="outlined"
-              placeholder="搜索电影..."
-              value={searchQuery}
-              onChange={handleSearchChange}
-              slotProps={{
-                input: {
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <Search />
-                    </InputAdornment>
-                  ),
-                }
-              }}
-              sx={{
-                minWidth: 200,
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: 2,
-                  backgroundColor: 'background.paper',
-                },
-              }}
+          <Tabs
+            value={activeTab}
+            onChange={handleTabChange}
+            aria-label="电影分类标签"
+            variant="scrollable"
+            scrollButtons="auto"
+            allowScrollButtonsMobile
+            sx={{
+              '& .MuiTab-root': {
+                fontSize: '1rem',
+                fontWeight: 'bold',
+                minWidth: 'auto',
+                px: 2,
+              },
+              '& .MuiTabs-scrollButtons': {
+                color: 'primary.main',
+              },
+              '& .MuiTabs-scrollButtons.Mui-disabled': {
+                opacity: 0.3,
+              },
+            }}
+          >
+            <Tab label="热门电影" value="popular" />
+            <Tab label="正在上映" value="now_playing" />
+            <Tab label="高分电影" value="top_rated" />
+            <Tab label="AppleTV" value="2" />
+            <Tab label="Netflix" value="8" />
+            <Tab label="Hulu" value="15" />
+            <Tab label="HBOMax" value="384" />
+            <Tab label="AmazonVideo" value="12" />
+            <Tab label="ShowMax" value="55" />
+            <Tab label="ParamountPlus" value="531" />
+            <Tab
+              icon={
+                <TextField
+                  size="small"
+                  variant="outlined"
+                  placeholder="搜索电影..."
+                  value={searchQuery}
+                  onChange={handleSearchChange}
+                  slotProps={{
+                    input: {
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <Search />
+                        </InputAdornment>
+                      ),
+                    }
+                  }}
+                  sx={{
+                    minWidth: 200,
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: 2,
+                      backgroundColor: 'background.paper',
+                    },
+                  }}
+                />
+              }
+              sx={{ minWidth: 'auto', p: 0 }}
             />
-          </Box>
+          </Tabs>
         </Box>
 
         <Box

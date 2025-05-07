@@ -19,7 +19,7 @@ function convertToMediaFormat(media: any): Media {
     title: media.name,
     poster_path: `https://media.themoviedb.org/t/p/w220_and_h330_face${media.poster_path}`,
     overview: media.overview,
-    release_date: media.release_date || media.first_air_date,
+    release_date: media.first_air_date || media.release_date || '',
     vote_average: media.vote_average,
     tmdbId: media.id,
     tvdbId: media.tvdb_id || '',
@@ -34,17 +34,14 @@ export async function fetchTVShows(page: number = 1, parameter: string = 'popula
   }
 
   let url = '';
-  if(['popular', 'top_rated', 'now_playing'].includes(parameter)) {
-     url = `${BASE_URL}/tv/${parameter}?api_key=${API_KEY}&language=zh-CN&page=${page}`;
+  if (['popular', 'top_rated', 'on_the_air'].includes(parameter)) {
+    url = `${BASE_URL}/tv/${parameter}?api_key=${API_KEY}&language=zh-CN&page=${page}`;
   }
-  else{
-    url = `https://api.themoviedb.org/3/discover/tv?region=US&with_networks=${parameter}&language=zh-CN&api_key=${process.env.NEXT_PUBLIC_TMDB_API_KEY}&page=${page}`;
+  else {
+    url = `${BASE_URL}/discover/tv?region=US&with_networks=${parameter}&language=zh-CN&api_key=${process.env.NEXT_PUBLIC_TMDB_API_KEY}&page=${page}`;
   }
-
-  console.log('url', url);
 
   const response = await fetch(url);
-
   if (!response.ok) {
     throw new Error(`获取电视剧列表失败: ${response.statusText}`);
   }

@@ -60,7 +60,7 @@ export default function TVPage() {
     }
   }, [loading, hasMore, page, sonarrTmdbIds, activeTab, searchQuery]);
 
-  const handleTabChange = (event: React.SyntheticEvent, newValue: 'popular' | 'top_rated' | 'on_the_air') => {
+  const handleTabChange = (event: React.SyntheticEvent, newValue: string) => {
     setActiveTab(newValue);
     setTVShows([]);
     setPage(1);
@@ -147,60 +147,68 @@ export default function TVPage() {
         </Box>
 
         <Box sx={{ mb: 4 }}>
-          <Box sx={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: 2,
-            flexWrap: 'wrap'
-          }}>
-            <Tabs
-              value={activeTab}
-              onChange={handleTabChange}
-              aria-label="电视剧分类标签"
-              sx={{
-                '& .MuiTab-root': {
-                  fontSize: '1rem',
-                  fontWeight: 'bold',
-                },
-              }}
-            >
-              <Tab label="热门剧集" value="popular" />
-              <Tab label="正在播出" value="on_the_air" />
-              <Tab label="高分剧集" value="top_rated" />
-              <Tab label="Netflix" value="213" />
-              <Tab label="AppleTV+" value="2552" />
-              <Tab label="HBO" value="49" />
-              <Tab label="Hulu" value="453" />
-              <Tab label="Disney+" value="2739" />
-              <Tab label="PrimeVideo" value="1024" />
-              <Tab label="Discovery+" value="4353" />
-              <Tab label="CINEMAX" value="359" />
-            </Tabs>
-
-            <TextField
-              size="small"
-              variant="outlined"
-              placeholder="搜索电视剧..."
-              value={searchQuery}
-              onChange={handleSearchChange}
-              slotProps={{
-                input: {
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <Search />
-                    </InputAdornment>
-                  ),
-                }
-              }}
-              sx={{
-                minWidth: 200,
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: 2,
-                  backgroundColor: 'background.paper',
-                },
-              }}
+          <Tabs
+            value={activeTab}
+            onChange={handleTabChange}
+            aria-label="电视剧分类标签"
+            variant="scrollable"
+            scrollButtons="auto"
+            allowScrollButtonsMobile
+            sx={{
+              '& .MuiTab-root': {
+                fontSize: '1rem',
+                fontWeight: 'bold',
+                minWidth: 'auto',
+                px: 2,
+              },
+              '& .MuiTabs-scrollButtons': {
+                color: 'primary.main',
+              },
+              '& .MuiTabs-scrollButtons.Mui-disabled': {
+                opacity: 0.3,
+              },
+            }}
+          >
+            <Tab label="热门剧集" value="popular" />
+            <Tab label="正在播出" value="on_the_air" />
+            <Tab label="高分剧集" value="top_rated" />
+            <Tab label="Netflix" value="213" />
+            <Tab label="AppleTV+" value="2552" />
+            <Tab label="HBO" value="49" />
+            <Tab label="Hulu" value="453" />
+            <Tab label="Disney+" value="2739" />
+            <Tab label="PrimeVideo" value="1024" />
+            <Tab label="Discovery+" value="4353" />
+            <Tab label="CINEMAX" value="359" />
+            <Tab
+              icon={
+                <TextField
+                  size="small"
+                  variant="outlined"
+                  placeholder="搜索电视剧..."
+                  value={searchQuery}
+                  onChange={handleSearchChange}
+                  slotProps={{
+                    input: {
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <Search />
+                        </InputAdornment>
+                      ),
+                    }
+                  }}
+                  sx={{
+                    minWidth: 200,
+                    '& .MuiOutlinedInput-root': {
+                      borderRadius: 2,
+                      backgroundColor: 'background.paper',
+                    },
+                  }}
+                />
+              }
+              sx={{ minWidth: 'auto', p: 0 }}
             />
-          </Box>
+          </Tabs>
         </Box>
 
         <Box

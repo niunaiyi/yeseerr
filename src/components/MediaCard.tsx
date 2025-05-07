@@ -12,9 +12,10 @@ import {
   Alert,
 } from "@mui/material";
 import { Media, MediaType } from "@/types/Media";
-import { LocalMovies, Add } from "@mui/icons-material";
+import { LocalMovies, Add, Movie, LiveTv } from "@mui/icons-material";
 import { addMovieToRadarr, getDefaultAddMovieParams } from "@/lib/radarr";
 import { addTVShowToSonarr, getDefaultAddTVShowParams, getSeriesByTmdbId } from "@/lib/sonarr";
+
 interface MovieCardProps {
   movie: Media;
   priority?: boolean;
@@ -27,7 +28,6 @@ export default function MediaCard({
   priority = false,
   onAddSuccess,
 }: MovieCardProps) {
-  const [isHovered, setIsHovered] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
   const [snackbar, setSnackbar] = useState<{
     open: boolean;
@@ -92,73 +92,92 @@ export default function MediaCard({
             opacity: 1,
           },
         }}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
       >
-        <Image
-          src={`${movie.poster_path}`}
-          alt={movie.title}
-          fill
-          sizes="(max-width: 600px) 100vw, (max-width: 900px) 50vw, 33vw"
-          priority={priority}
-          style={{
-            objectFit: "cover",
-            transition: "transform 0.3s ease",
-            transform: isHovered ? "scale(1.05)" : "scale(1)",
-          }}
-        />
+        <Box sx={{ position: "relative", paddingTop: "150%" }}>
+          <Image
+            src={movie.poster_path || "/placeholder.png"}
+            alt={movie.title}
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            priority={priority}
+            style={{ objectFit: "cover" }}
+          />
+          
+          <Chip
+            icon={movie.mediatype === MediaType.MediaMovie ? <Movie /> : <LiveTv />}
+            size="small"
+            sx={{
+              position: "absolute",
+              top: 8,
+              left: 8,
+              backgroundColor: "rgba(0, 0, 0, 0.7)",
+              color: "white",
+              "& .MuiChip-icon": {
+                color: "primary.main",
+                margin: 0,
+              },
+              "& .MuiChip-label": {
+                display: "none",
+              },
+              minWidth: "32px",
+              width: "32px",
+              height: "32px",
+              padding: 0,
+            }}
+          />
 
-        {movie.inRadarr ? (
-          <Tooltip title="已在本地库中" placement="top">
-            <Button
-              sx={{
-                position: "absolute",
-                top: 8,
-                right: 8,
-                backgroundColor: "rgba(0, 0, 0, 0.7)",
-                borderRadius: "50%",
-                minWidth: "36px",
-                width: "36px",
-                height: "36px",
-                padding: 0,
-                "&:hover": {
-                  backgroundColor: "rgba(0, 0, 0, 0.9)",
-                },
-                "&.Mui-disabled": {
-                  backgroundColor: "rgba(0, 0, 0, 0.5)",
-                },
-              }}
-            >
-              <LocalMovies sx={{ color: "primary.main", fontSize: "1.2rem" }} />
-            </Button>
-          </Tooltip>
-        ) : (
-          <Tooltip title="添加到本地库" placement="top">
-            <Button
-              onClick={handleAddToRadarr}
-              disabled={isAdding}
-              sx={{
-                position: "absolute",
-                top: 8,
-                right: 8,
-                backgroundColor: "rgba(0, 0, 0, 0.7)",
-                borderRadius: "50%",
-                minWidth: "36px",
-                width: "36px",
-                height: "36px",
-                padding: 0,
-                "&:hover": {
-                  backgroundColor: "rgba(0, 0, 0, 0.9)",
-                },
-                "&.Mui-disabled": {
-                  backgroundColor: "rgba(0, 0, 0, 0.5)",
-                },
-              }}
-            >
-              <Add sx={{ color: "primary.main", fontSize: "1.2rem" }} />
-            </Button>
-          </Tooltip>
-        )}
+          {movie.inRadarr ? (
+            <Tooltip title="已在本地库中" placement="top">
+              <Button
+                sx={{
+                  position: "absolute",
+                  top: 8,
+                  right: 8,
+                  backgroundColor: "rgba(0, 0, 0, 0.7)",
+                  borderRadius: "50%",
+                  minWidth: "36px",
+                  width: "36px",
+                  height: "36px",
+                  padding: 0,
+                  "&:hover": {
+                    backgroundColor: "rgba(0, 0, 0, 0.9)",
+                  },
+                  "&.Mui-disabled": {
+                    backgroundColor: "rgba(0, 0, 0, 0.5)",
+                  },
+                }}
+              >
+                <LocalMovies sx={{ color: "primary.main", fontSize: "1.2rem" }} />
+              </Button>
+            </Tooltip>
+          ) : (
+            <Tooltip title="添加到本地库" placement="top">
+              <Button
+                onClick={handleAddToRadarr}
+                disabled={isAdding}
+                sx={{
+                  position: "absolute",
+                  top: 8,
+                  right: 8,
+                  backgroundColor: "rgba(0, 0, 0, 0.7)",
+                  borderRadius: "50%",
+                  minWidth: "36px",
+                  width: "36px",
+                  height: "36px",
+                  padding: 0,
+                  "&:hover": {
+                    backgroundColor: "rgba(0, 0, 0, 0.9)",
+                  },
+                  "&.Mui-disabled": {
+                    backgroundColor: "rgba(0, 0, 0, 0.5)",
+                  },
+                }}
+              >
+                <Add sx={{ color: "primary.main", fontSize: "1.2rem" }} />
+              </Button>
+            </Tooltip>
+          )}
+        </Box>
 
         <Box
           className="movie-info"
@@ -200,7 +219,7 @@ export default function MediaCard({
               }}
             />
             <Typography variant="body2" sx={{ opacity: 0.8 }}>
-              {movie.release_date.split("-")[0]}
+              {movie.release_date ? movie.release_date.split("-")[0] : ""}
             </Typography>
           </Box>
         </Box>
